@@ -44,7 +44,6 @@ import androidx.core.app.NotificationManagerCompat
 import com.github.zly2006.zhihu.data.AccountData
 import com.github.zly2006.zhihu.ui.components.WebviewComp
 import com.github.zly2006.zhihu.ui.components.setupUpWebviewClient
-import com.github.zly2006.zhihu.util.telemetry
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.launch
 import java.util.TimeZone
@@ -78,12 +77,10 @@ actual fun decodePhoneLoginCaptchaImage(content: String) = runCatching {
 
 @Composable
 actual fun QrLoginPane(onLoginSuccess: (String) -> Unit) {
-    val context = LocalContext.current
     val accountStore = rememberZhihuAccountStore()
     SharedQrLoginPane(
         onLoginSuccess = { cookies ->
             if (accountStore.login(cookies.toMutableMap())) {
-                telemetry(context, "login")
                 onLoginSuccess(accountStore.session.username)
                 true
             } else {
@@ -96,7 +93,6 @@ actual fun QrLoginPane(onLoginSuccess: (String) -> Unit) {
 
 @Composable
 actual fun WebLoginPane(onLoginSuccess: (String) -> Unit) {
-    val context = LocalContext.current
     val accountStore = rememberZhihuAccountStore()
     val scope = rememberCoroutineScope()
     var isVerifying by remember { mutableStateOf(false) }
@@ -110,7 +106,6 @@ actual fun WebLoginPane(onLoginSuccess: (String) -> Unit) {
                     scope.launch {
                         try {
                             if (accountStore.login(cookies.toMutableMap())) {
-                                telemetry(context, "login")
                                 onLoginSuccess(accountStore.session.username)
                             }
                         } finally {
