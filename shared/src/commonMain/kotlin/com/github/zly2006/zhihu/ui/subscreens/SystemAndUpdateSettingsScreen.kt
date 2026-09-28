@@ -380,19 +380,6 @@ fun SystemAndUpdateSettingsScreen(
                     highlightedKey = highlightedSetting,
                 )
 
-                var allowTelemetry by remember { mutableStateOf(settings.getBoolean("allowTelemetry", true)) }
-                SettingItemWithSwitch(
-                    title = { Text("允许发送遥测统计数据") },
-                    description = { Text("仅用于统计使用人数，不包含个人隐私") },
-                    checked = allowTelemetry,
-                    onCheckedChange = {
-                        allowTelemetry = it
-                        settings.putBoolean("allowTelemetry", it)
-                    },
-                    settingKey = "allowTelemetry",
-                    highlightedKey = highlightedSetting,
-                )
-
                 var aigcMarkingEnabled by remember {
                     mutableStateOf(settings.getBoolean(AIGC_MARKING_ENABLED_PREFERENCE_KEY, false))
                 }

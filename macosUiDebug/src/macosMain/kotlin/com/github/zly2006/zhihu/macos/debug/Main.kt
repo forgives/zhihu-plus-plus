@@ -165,7 +165,6 @@ fun main(args: Array<String>) {
                             MacosUserMessageHost {
                                 LoginScreen(
                                     onLoginComplete = {},
-                                    onOpenTelemetrySettings = {},
                                 )
                             }
                         }
