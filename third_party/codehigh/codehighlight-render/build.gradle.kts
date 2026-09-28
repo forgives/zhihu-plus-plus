@@ -34,10 +34,10 @@ kotlin {
         namespace = "com.hrm.codehigh.render"
         compileSdk = 37
         minSdk = 27
-        compilerOptions.jvmTarget = JvmTarget.JVM_17
+        compilerOptions.jvmTarget = JvmTarget.JVM_21
     }
     jvm {
-        compilerOptions.jvmTarget = JvmTarget.JVM_17
+        compilerOptions.jvmTarget = JvmTarget.JVM_21
     }
     iosArm64()
     iosSimulatorArm64()

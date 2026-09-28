@@ -1,6 +1,10 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Zhihu++ Agent Instructions
 
-本项目是隐私增强的知乎 Android 客户端，支持本地推荐算法、广告屏蔽、内容过滤。
+本项目是隐私增强的知乎 Android 客户端，支持本地推荐算法、广告屏蔽、内容过滤。基于 Kotlin Multiplatform (KMP) 构建，共享模块支持 Android、JVM (桌面端) 和 iOS。
 
 ## 经验总结
 
@@ -250,21 +254,49 @@ Compose 页面需要在进入前台时刷新数据，应优先让协程直接跟
 # 验证修改（必须按顺序执行）
 ./gradlew assembleLiteDebug  # 构建 lite 变体
 ./gradlew ktlintFormat        # 格式化代码
+
+# 运行单元测试
+./gradlew testLiteDebugUnitTest              # lite 变体单元测试
+./gradlew testFullDebugUnitTest              # full 变体单元测试
+./gradlew test --tests "*.SearchViewModelUrlTest"  # 运行单个测试类
+
+# 运行 Android Instrumented 测试（需要模拟器）
+./gradlew connectedLiteDebugAndroidTest      # lite 变体 instrumented 测试
+
+# 构建桌面端
+./gradlew :desktopApp:run                    # 运行桌面应用
+./gradlew :desktopApp:packageReleaseUberJarForCurrentOS  # 打包桌面 release jar
+
+# ktlint 检查（不自动修复）
+./gradlew ktlintCheck
 ```
 
 **重要**: 修改后必须先构建验证，再格式化，最后提交。
 
 ## 项目结构
 
-- **app**: 主应用（Jetpack Compose UI）
+- **app**: Android 主应用（Jetpack Compose UI）
     - `src/main`: 共享代码
     - `src/full`: Full variant（含 NLP）
     - `src/lite`: Lite variant（轻量级）
-- **Module**: `sentence_embeddings`（Rust tokenizer，仅 full variant）
+- **shared**: Kotlin Multiplatform 共享模块
+    - `src/commonMain`: 跨平台代码（ViewModel、数据层、UI 组件）
+    - `src/androidMain`: Android 特定实现
+    - `src/jvmMain`: 桌面端 (JVM) 特定实现
+    - `src/iosMain`: iOS 特定实现（框架导出）
+- **desktopApp**: 桌面端应用入口
+- **sentence_embeddings**: Rust tokenizer（仅 full variant）
 
 ### Build Variants
 - **lite**: 轻量版 (~4MB)，无 ML 功能，包名 `com.github.zly2006.zhplus.lite`
 - **full**: 完整版，含 HanLP NLP，包名 `com.github.zly2006.zhplus`
+
+### 多平台架构
+- 使用 Kotlin Multiplatform 共享业务逻辑
+- UI 层使用 Compose Multiplatform（shared 模块的 commonMain）
+- 数据库使用 Room（Android/JVM 共享）
+- 网络层使用 Ktor（跨平台）
+- 序列化使用 kotlinx.serialization
 
 ## 关键约定
 
