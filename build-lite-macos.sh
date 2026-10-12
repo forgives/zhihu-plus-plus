@@ -21,10 +21,22 @@ case "$ABI" in
     *) usage ;;
 esac
 
-# 全局 ~/.zshrc 将 JAVA_HOME 固定为 JDK 8，Gradle daemon 需要 JDK 17，这里强制指定。
+# 全局 ~/.zshrc 将 JAVA_HOME 固定为 JDK 8；toolchain 统一为 21 后 buildSrc 依赖
+# 要求 JVM 21 运行时，Gradle 必须直接跑在 JDK 21 上。
 # Apple Silicon 上必须用 arm64 原生 JDK，Intel JDK 会让 Kotlin/Native 误判 host 为 macos_x64。
-if ! JAVA_HOME="$(/usr/libexec/java_home -v 17 2>/dev/null)"; then
-    echo "错误: 未找到 JDK 17，请先安装" >&2
+# 注意: java_home -v 21 在只装了 JDK 17 时会静默回落到 17（退出码还是 0），必须校验实际版本。
+JAVA_HOME=""
+for candidate in \
+    "$(/usr/libexec/java_home -v 21 2>/dev/null)" \
+    "$HOME"/.gradle/jdks/eclipse_adoptium-21-*/jdk-21*/Contents/Home; do
+    if [ -n "$candidate" ] && [ -x "$candidate/bin/java" ] &&
+        "$candidate/bin/java" -version 2>&1 | grep -q 'version "21'; then
+        JAVA_HOME="$candidate"
+        break
+    fi
+done
+if [ -z "$JAVA_HOME" ]; then
+    echo "错误: 未找到 JDK 21，请先安装，或先运行一次 ./gradlew 让 Gradle 自动下载" >&2
     exit 1
 fi
 export JAVA_HOME
@@ -54,7 +66,7 @@ echo ">> Gradle: $GRADLE"
 # AGP 9 已移除 android.injected.build.abi 注入属性的支持，且该属性不参与任务
 # up-to-date 检查（改动后打包任务不会失效，容易拿到旧的全 ABI 产物）。
 # 因此用 init script 显式配置 packaging.jniLibs.excludes 排除其余 ABI。
-GRADLE_ARGS=()
+# 不用空数组传参：macOS 自带 bash 3.2 在 set -u 下展开空数组会报 unbound variable。
 if [ "$ABI" != "all" ]; then
     EXCLUDES=""
     for a in $ALL_ABIS; do
@@ -76,13 +88,14 @@ allprojects {
     }
 }
 EOF
-    GRADLE_ARGS+=(-I "$INIT_SCRIPT")
     echo ">> ABI: 仅保留 $ABI"
 fi
 
-"$GRADLE" ":app:$TASK" "${GRADLE_ARGS[@]}"
 if [ "$ABI" != "all" ]; then
-    rm -f "build/abi-filter.init.gradle"
+    "$GRADLE" ":app:$TASK" -I "$INIT_SCRIPT"
+    rm -f "$INIT_SCRIPT"
+else
+    "$GRADLE" ":app:$TASK"
 fi
 
 APK_DIR="app/build/outputs/apk/lite/$BUILD_TYPE"
