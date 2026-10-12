@@ -34,11 +34,11 @@ kotlin {
         namespace = "com.hrm.latex.renderer"
         compileSdk = 37
         minSdk = 27
-        compilerOptions.jvmTarget = JvmTarget.JVM_17
+        compilerOptions.jvmTarget = JvmTarget.JVM_21
         androidResources.enable = true
     }
     jvm {
-        compilerOptions.jvmTarget = JvmTarget.JVM_17
+        compilerOptions.jvmTarget = JvmTarget.JVM_21
     }
     iosArm64()
     iosSimulatorArm64()

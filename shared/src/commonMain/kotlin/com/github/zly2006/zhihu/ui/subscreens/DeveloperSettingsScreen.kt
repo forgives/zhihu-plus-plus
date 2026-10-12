@@ -67,7 +67,6 @@ import com.github.zly2006.zhihu.navigation.Account
 import com.github.zly2006.zhihu.navigation.LocalNavigator
 import com.github.zly2006.zhihu.navigation.SentenceSimilarityTest
 import com.github.zly2006.zhihu.platform.isSentenceSimilaritySupported
-import com.github.zly2006.zhihu.platform.rememberIsLiteVariant
 import com.github.zly2006.zhihu.platform.rememberPlainTextClipboard
 import com.github.zly2006.zhihu.platform.rememberSettingsStore
 import com.github.zly2006.zhihu.platform.rememberUserMessageSink
@@ -190,7 +189,7 @@ fun DeveloperSettingsScreen() {
 
                 Button(onClick = { showSignedRequestDialog = true }) { Text("签名请求") }
 
-                if (isSentenceSimilaritySupported && !rememberIsLiteVariant()) {
+                if (isSentenceSimilaritySupported) {
                     Button(
                         modifier = Modifier.testTag(DEVELOPER_SETTINGS_SENTENCE_SIMILARITY_TAG),
                         onClick = {
